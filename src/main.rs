@@ -2,6 +2,7 @@
 
 use rayon::prelude::*;
 use std::{fs, io, process::Command};
+use std::ffi::OsString;
 
 const USAGE_STR: &'static str = r#"USAGE: 
 	ffmpeg_convert [output_format]"#;
@@ -18,6 +19,11 @@ fn main() -> io::Result<()> {
 		match entry.metadata() {
 			Ok(m) if m.is_file() => (),
 			_ => return, // Skip if it's not a file
+		}
+		// Skip if the file has the same extension as the one provided
+		let file_ext = entry.path().extension().unwrap_or_default().to_os_string();
+		if file_ext == OsString::from(&args[0]) {
+			return;
 		}
 
 		let file_path = entry.path();
